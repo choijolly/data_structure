@@ -1,75 +1,123 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct _node {
+typedef struct Node {
     int key;
-    struct _node* next;
+    struct Node* next;
 } node;
 
 node* head, * tail;
 
+// 리스트 초기화
 void init_list() {
     head = (node*)calloc(1, sizeof(node));
     tail = (node*)calloc(1, sizeof(node));
-    if (!head || !tail) {
-        printf("Memory allocation failed!\n");
-        exit(1);
-    }
     head->next = tail;
-    tail->next = NULL;  // tail의 next를 NULL로 설정하여 리스트 끝을 명확히 함
 }
 
-node* ordered_insert(int k) {
-    node *p = head, *s = head->next, *r;
-    
-    while (s != tail && s->key <= k) { // `s != tail` 조건을 먼저 확인
+// 오름차순 삽입
+void ordered_insert(int k) {
+    node* p = head;
+    node* s = head->next;
+
+    while (s != tail && s->key < k) {
         p = s;
         s = s->next;
     }
-    
-    r = (node*)calloc(1, sizeof(node));
-    if (!r) {
-        printf("Memory allocation failed!\n");
-        exit(1);
-    }
-    
-    r->key = k;
-    p->next = r;
-    r->next = s;
-    
-    return r;
+
+    node* newNode = (node*)calloc(1, sizeof(node));
+    newNode->key = k;
+    p->next = newNode;
+    newNode->next = s;
 }
 
-void print_list() {
-    node* t = head->next;
-    while (t != tail) {
-        printf("%-8d", t->key);
-        t = t->next;
+// 특정 값을 가진 노드 찾기
+node* find_node(int k) {
+    node* temp = head->next;
+
+    while (temp != tail && temp->key != k) {
+        temp = temp->next;
+    }
+
+    return (temp == tail) ? NULL : temp;  // 찾지 못하면 NULL 반환
+}
+
+// 특정 노드 t 뒤에 k 삽입
+void insert_after(int k, node* t) {
+    if (t == NULL || t == tail) return;  // 유효한 노드인지 확인
+
+    node* newNode = (node*)calloc(1, sizeof(node));
+    newNode->key = k;
+
+    newNode->next = t->next;
+    t->next = newNode;
+}
+
+// 특정 값을 가진 노드 삭제
+void delete_node(int k) {
+    node* p = head;
+    node* s = head->next;
+
+    while (s != tail && s->key != k) {
+        p = s;
+        s = s->next;
+    }
+
+    if (s == tail) {
+        printf("%d를 찾을 수 없습니다.\n", k);
+        return;
+    }
+
+    p->next = s->next;
+    free(s);
+}
+
+// 리스트 출력
+void print_list(node* start) {
+    while (start != tail) {
+        printf("%d ", start->key);
+        start = start->next;
     }
     printf("\n");
 }
 
+// 리스트 메모리 해제
 void free_list() {
-    node* t = head;
-    while (t) {
-        node* temp = t;
-        t = t->next;
+    node* temp = head;
+    while (temp) {
+        node* next = temp->next;
         free(temp);
+        temp = next;
     }
 }
 
-int main() {
+// ✅ 메인 함수 (void main → int main)
+void main() {
+    node* t;
+
     init_list();
-    
+
+    // 오름차순 삽입
     ordered_insert(9);
     ordered_insert(3);
     ordered_insert(5);
     ordered_insert(1);
     ordered_insert(7);
-    
-    print_list();
-    
+
+    print_list(head->next);  // 출력: 1 3 5 7 9
+
+    // '5'를 찾아서 그 뒤에 '6' 삽입
+    t = find_node(5);
+    insert_after(6, t);
+
+    printf("\n");
+    print_list(head->next);  // 출력: 1 3 5 6 7 9
+
+    // '5' 삭제
+    delete_node(5);
+    printf("\n");
+    print_list(head->next);  // 출력: 1 3 6 7 9
+
     free_list();
-    
     return 0;
 }
