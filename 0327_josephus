@@ -1,0 +1,76 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct node {
+    int key;
+    struct node* next;
+} node;
+
+node* head = NULL;
+node* tail = NULL;
+
+void insert_nodes(int k) {
+    // make a list from 1 to k
+    node* t;
+    int i;
+    t = (node*)calloc(1, sizeof(node));
+    t->key = 1;
+    head = t;
+    for (i = 2; i <= k; i++) {
+        t->next = (node*)calloc(1, sizeof(node));
+        t = t->next;
+        t->key = i;
+    }
+    t->next = head;
+}
+
+
+void delete_after(node* t) {
+    node* s;
+    s = t->next;
+    t->next = t->next->next;
+    free(s);
+    // just the same as a simple LL
+}
+
+void insert_after(int k, node* t) {
+    if (t == NULL || t == tail) return;  // 유효한 노드인지 확인
+
+    node* newNode = (node*)calloc(1, sizeof(node));
+    newNode->key = k;
+
+    newNode->next = t->next;
+    t->next = newNode;
+}
+
+void josephus(int n, int m) {
+    node* t;
+    int i;
+
+    insert_nodes(n);
+    t = head;
+    printf("\nAnswer: ");
+
+    while (t != t->next) {
+        for (i = 0; i < m - 1; i++)
+            t = t->next;
+
+        printf("%d ", t->next->key);
+        delete_after(t);
+    }
+    printf("%d\n", t->key); // 마지막 남은 노드 출력
+    free(t);
+}
+
+
+
+int main() {
+    int n, m;
+
+    printf("Enter N and M: ");
+    scanf_s("%d %d", &n, &m);
+
+    josephus(n, m);
+
+    return 0;
+}
