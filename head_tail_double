@@ -1,0 +1,91 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct _dnode {
+    int key;
+    struct _dnode* prev;
+    struct _dnode* next;
+} dnode;
+
+
+dnode* head, * tail;
+
+
+
+
+
+
+
+void init_dlist() {
+    head = (dnode*)calloc(1, sizeof(dnode));
+    tail = (dnode*)calloc(1, sizeof(dnode));
+
+    head->next = tail;
+    head->prev = NULL;
+    tail->next = NULL;
+    tail->prev = head;
+}
+
+
+
+
+
+
+dnode* find_dnode(int k) {
+    dnode* s;
+    s=head->next;
+    while (s != tail && s->key != k) {
+        s = s->next;
+    }
+    return s;
+}
+
+dnode* ordered_insert(int k) {
+    dnode* s = head->next;
+    dnode* i;
+
+    while (s != tail && s->key <= k) {
+        s = s->next;
+    }
+
+    i = (dnode*)calloc(1, sizeof(dnode));
+    
+
+    i->key = k;
+
+    i->prev = s->prev;
+    i->next = s;
+    s->prev->next = i;
+    s->prev = i;
+
+    return i;
+}
+
+void print_list(dnode* p)
+{
+    printf("\n");
+    while (p != tail)
+    {
+        printf("%-8d", p->key);
+        p = p->next;
+    }
+}
+
+int main() {
+    dnode* t;
+
+    init_dlist();
+
+    ordered_insert(9);
+    ordered_insert(3);
+    ordered_insert(5);
+    ordered_insert(1);
+    ordered_insert(7);
+
+    print_list(head->next);
+
+    t = find_dnode(5);
+    printf("\nFinding 5 is %ssuccessful\n", t == tail ? "un" : "");
+
+    return 0;
+}
