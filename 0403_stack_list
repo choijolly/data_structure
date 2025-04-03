@@ -1,0 +1,120 @@
+#include <stdio.h>
+#include <stdlib.h>
+int count = 0;
+
+typedef struct Node {
+    int key;
+    struct Node* next;
+} node;
+
+node* head, * tail;
+
+// 리스트 초기화
+void init_list() {
+    head = (node*)calloc(1, sizeof(node));
+    tail = (node*)calloc(1, sizeof(node));
+    head->next = tail;
+}
+
+int push(int k)
+{
+    node* t;
+    if ((t = (node*)malloc
+    (sizeof(node))) == NULL)
+    {
+        printf("Out of memory !\n");
+        return -1;
+    }
+    t->key = k;
+    t->next = head->next;
+    head->next = t;
+
+        return k;
+}
+
+
+int pop()
+{
+    node* t;
+    int k;
+    if (head->next == tail)
+    {
+        printf("Stack underflow !\n");
+        return -1;
+    }
+    t = head->next;
+    k = t->key;
+    head->next = t->next;
+    free(t);
+
+    return k;
+}
+
+void clear()
+{
+    node* t, * s;
+    t = head->next;
+    while (t != tail)
+    {
+        s = t;
+        t = t->next;
+        free(s);
+    }
+    head->next = tail;
+}
+
+
+// 리스트 출력
+void print_stack()
+{
+    node* t;
+    t = head->next;
+    while (t != tail) {
+        ++count;
+        printf("  %d\n", t->key);
+        t = t->next;
+    }
+}
+
+
+// 리스트 메모리 해제
+void free_list() {
+    node* temp = head;
+    while (temp) {
+        node* next = temp->next;
+        free(temp);
+        temp = next;
+    }
+}
+
+// ✅ 메인 함수 (void main → int main)
+void main() {
+    node* t;
+
+    init_list();
+
+//to do list 1
+    push(3);
+    push(6);
+    push(9);
+    push(1);
+    push(6);
+    push(3);
+
+    print_stack();
+
+//to do list2
+    pop();
+    print_stack();
+
+//to do list3
+    push(4);
+    push(8);
+    push(7);
+    push(2);
+    push(0);
+	print_stack();
+
+//to do list4
+       
+}
