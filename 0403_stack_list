@@ -116,5 +116,10 @@ void main() {
 	print_stack();
 
 //to do list4
-       
+    clear();
+    print_stack();
+
+//to do list5
+    pop();
+    print_stack();
 }
