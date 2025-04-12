@@ -33,15 +33,7 @@ void delete_after(node* t) {
     // just the same as a simple LL
 }
 
-void insert_after(int k, node* t) {
-    if (t == NULL || t == tail) return;  // 유효한 노드인지 확인
 
-    node* newNode = (node*)calloc(1, sizeof(node));
-    newNode->key = k;
-
-    newNode->next = t->next;
-    t->next = newNode;
-}
 
 void josephus(int n, int m) {
     node* t;
