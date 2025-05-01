@@ -1,0 +1,44 @@
+#include<stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#define SIZE 10
+
+void indirect_insert_sort(int* a, int* index, int N)
+{
+	int i, j, t;
+	for (i = 0; i < N; i++)
+		index[i] = i;
+	for (i = 1; i < N; i++)
+	{
+		t = index[i];
+		j = i;
+		while (j > 0 && a[index[j - 1]] > a[t])
+		{
+			index[j] = index[j - 1];
+			j--;
+		}
+		index[j] = t;
+		}
+	}
+
+int main() {
+	int num[SIZE] = { 9,8,7,6,5,4,3,2,1,0 };
+	int index[SIZE] = { 0,1,2,3,4,5,6,7,8,9 };
+
+	indirect_insert_sort(num,index,SIZE);
+
+	printf("정렬 전: ");
+	for (int i = 0; i < SIZE; i++)
+	{	
+		
+		printf("%d ",num[i]);
+	}
+
+	printf("정렬 후: ");
+	for (int i = 0; i < SIZE; i++)
+	{
+		
+		printf("%d ", index[num[i]]);
+	}
+	printf("\n");
+}
