@@ -1,0 +1,32 @@
+#include<stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#define SIZE 10
+
+void insert_sort(int* a, int N)
+{
+	int i, j, t;
+	for (i = 1; i < N; i++)
+	{
+		t = a[i];
+		j = i;
+		while (j > 0 && a[j - 1] > t)
+		{
+			a[j] = a[j - 1];
+			j--;
+		}
+		a[j] = t;
+	}
+}
+
+int main() {
+	int num[SIZE] = { 9,8,7,6,5,4,3,2,1,0 };
+
+	insert_sort(num, SIZE);
+
+	for (int i = 0; i < SIZE; i++)
+	{
+		printf("%d ", num[i]);
+	}
+	printf("\n");
+}
