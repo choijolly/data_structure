@@ -1,0 +1,86 @@
+#include<stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#define SIZE 10
+
+int stack[SIZE];             
+int top;
+
+void init_stack(void) {
+	top = -1;
+}
+
+
+int is_stack_empty() {
+	return top == -1;
+}
+
+
+int push(int t) {
+	if (top >= SIZE - 1) {
+		printf("Stack overflow !!!\n");
+		return -1;
+	}
+	stack[++top] = t;
+	return t;
+}
+
+
+
+int pop() {
+	if (top < 0) {
+		printf("Stack underflow!!!\n");
+		return -1;
+	}
+	return stack[top--];
+}
+
+void quick_sort1(int* a, int N)
+{
+	int v, t;
+	int i, j;
+	int l, r;
+	init_stack();
+	l = 0;
+	r = N - 1;
+	push(r);
+	push(l);
+	while (!is_stack_empty()) {
+		l = pop();
+		r = pop();
+		if (r - l + 1 > 1) // termination
+		{
+			v = a[r];
+			i = l - 1;
+			j = r;
+			while (1) {
+				while (a[++i] < v);
+				while (a[--j] > v);
+				if (i >= j) break;
+				t = a[i];
+				a[i] = a[j];
+				a[j] = t;
+			}
+			t = a[i];
+			a[i] = a[r];
+			a[r] = t;
+
+			push(r);
+			push(i + 1);
+			push(i - 1);
+			push(l);
+		}
+	}
+}
+
+int main() {
+	int num[SIZE] = { 9,8,7,6,5,4,3,2,1,0 };
+
+	quick_sort1(num, SIZE);
+
+	for (int i = 0; i < SIZE; i++)
+	{
+		printf("%d ", num[i]);
+	}
+	printf("\n");
+}
