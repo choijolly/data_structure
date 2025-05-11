@@ -1,0 +1,101 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define _CRT_SECURE_NO_WARNINGS
+
+void read_file(int* input, int height, int width, char filename[]);
+void median_filtering(int* input, int* output, int height, int width, int window_size);
+void insertion_sort(int* arr, int size);
+
+// 파일에서 입력 데이터 읽기
+void read_file(int* input, int height, int width, char filename[]) {
+    int x, y;
+    FILE* fp = fopen(filename, "r");
+    
+
+    for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
+            fscanf_s(fp, "%d", &input[y * width + x]);
+        }
+    }
+    fclose(fp);
+}
+
+// 삽입 정렬
+void insertion_sort(int* arr, int size) {
+    for (int i = 1; i < size; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
+}
+
+// Median Filtering
+void median_filtering(int* input, int* output, int height, int width, int w) {
+    int win_size = w * w;
+    int* window = (int*)malloc(sizeof(int) * win_size);
+    int half = w / 2;
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            int count = 0;
+
+            for (int dy = -half; dy <= half; dy++) {
+                for (int dx = -half; dx <= half; dx++) {
+                    int ny = y + dy;
+                    int nx = x + dx;
+
+                    // replication padding
+                    if (ny < 0) ny = 0;
+                    if (ny >= height) ny = height - 1;
+                    if (nx < 0) nx = 0;
+                    if (nx >= width) nx = width - 1;
+
+                    window[count++] = input[ny * width + nx];
+                }
+            }
+
+            insertion_sort(window, win_size);
+            output[y * width + x] = window[win_size / 2];
+        }
+    }
+
+    free(window);
+}
+
+
+int main() {
+    int height = 44, width = 45;
+    int input[44 * 45];
+    int output[44 * 45];
+    int W;
+
+    printf("윈도우 크기를 입력하세요: ");
+    scanf_s("%d", &W);
+
+    if (W < 1) {
+        printf("유효하지 않은 윈도우 크기입니다.\n");
+        return 1;
+    }
+    if (W % 2 == 0) {
+        printf("입력한 값이 짝수입니다. 윈도우 크기를 %d → %d로 자동 변경합니다.\n", W, W + 1);
+        W += 1;
+    }
+
+    read_file(input, height, width, "C:\\Users\\미경\\Downloads\\noisy_data.txt");
+    median_filtering(input, output, height, width, W);
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            printf("%3d ", output[y * width + x]);
+         
+        
+        }
+        printf("\n");
+    }
+
+    return 0;
+}
