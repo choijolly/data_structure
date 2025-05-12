@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#define SIZE 10
+
+void gen_quick_sort(void* base, size_t nelem, size_t width, int (*fcmp)(const void*, const void*)) {
+    if (nelem <= 1) return;
+
+    char* base_ptr = (char*)base;
+    void* pivot = malloc(width);
+    void* temp = malloc(width);
+
+    size_t i = -1;
+    size_t j = nelem - 1;
+    memcpy(pivot, base_ptr + (nelem - 1) * width, width); // pivot = base[N-1]
+
+    while (1) {
+        do { i++; } while (fcmp(base_ptr + i * width, pivot) < 0);
+        do { j--; } while (j > 0 && fcmp(base_ptr + j * width, pivot) > 0);
+        if (i >= j) break;
+
+        // swap i <-> j
+        memcpy(temp, base_ptr + i * width, width);
+        memcpy(base_ptr + i * width, base_ptr + j * width, width);
+        memcpy(base_ptr + j * width, temp, width);
+    }
+
+    // pivot swap with i
+    memcpy(temp, base_ptr + i * width, width);
+    memcpy(base_ptr + i * width, base_ptr + (nelem - 1) * width, width);
+    memcpy(base_ptr + (nelem - 1) * width, temp, width);
+
+    // recursive calls
+    gen_quick_sort(base_ptr, i, width, fcmp);
+    gen_quick_sort(base_ptr + (i + 1) * width, nelem - i - 1, width, fcmp);
+
+    free(pivot);
+    free(temp);
+}
+
+// 비교 함수: int형 오름차순 정렬
+int intcmp(const void* a, const void* b) {
+    return (*(int*)a) - (*(int*)b);
+}
+
+int main() {
+    int num[SIZE] = { 9,8,7,6,5,4,3,2,1,0 };
+
+    gen_quick_sort(num, SIZE, sizeof(int), intcmp);
+
+    for (int i = 0; i < SIZE; i++) {
+        printf("%d ", num[i]);
+    }
+    printf("\n");
+
+    return 0;
+}
