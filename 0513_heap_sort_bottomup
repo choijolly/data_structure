@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define SIZE 10
+
+
+
+void downheap(int* a, int N, int k)
+{
+    int i, v = a[k];
+    while (k <= N / 2) {
+        i = k << 1;
+        if (i < N && a[i] < a[i + 1]) i++;
+        if (v >= a[i]) break;
+        a[k] = a[i];
+        k = i;
+    }
+    a[k] = v;
+}
+
+
+
+int extract(int* a, int* N)
+{
+    int v = a[1];
+    a[1] = a[(*N)--];
+    downheap(a, *N, 1);
+    return v;
+}
+
+void heap_sort(int* a, int N)
+{
+    int k, t;
+
+    for (k = N/2; k >=1;k--) {
+        downheap(a, N, k);
+    }
+
+    while (N > 1) {
+        t = a[1];
+        a[1] = a[N];
+        a[N] = t;
+        N--;
+        downheap(a, N, 1);
+    }
+
+
+}
+
+int main() {
+    int data_heap[SIZE + 1];
+    int k;
+
+    srand(time(NULL));
+
+    for (k = 0; k < SIZE; k++) {
+        data_heap[k + 1] = rand() % 10;
+        printf("%-5d", data_heap[k + 1]);
+    }
+
+    printf("\n");
+
+    heap_sort(data_heap, SIZE);
+
+    for (k = 0; k < SIZE; k++) {
+        printf("%-5d", data_heap[k + 1]);
+    }
+
+    printf("\n");
+
+    return 0;
+}
