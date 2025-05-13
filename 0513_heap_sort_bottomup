@@ -42,8 +42,7 @@ void heap_sort(int* a, int N)
         t = a[1];
         a[1] = a[N];
         a[N] = t;
-        N--;
-        downheap(a, N, 1);
+        downheap(a, --N, 1);
     }
 
 
