@@ -1,0 +1,89 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define SIZE 20
+
+void downheap(char* a, int N, int k)
+{
+    int i;
+    char v = a[k];
+    while (k <= N / 2 ) { 
+        i = 2 * k + 1;
+        if (i  < N && a[i] < a[i + 1]) i++; 
+        if (v >= a[i]) break;
+        a[k] = a[i];
+        k = i;
+    }
+    a[k] = v;
+}
+
+void heap_sort(char* a, int N)
+{
+    int k;
+    char t;
+
+    // Build max heap
+    for (k = N / 2 ; k >= 1; k--) {
+        downheap(a, N, k);
+    }
+
+    // Heap sort
+    for (k = N - 1; k > 0; k--) {
+        t = a[0];
+        a[0] = a[k];
+        a[k] = t;
+        downheap(a, k, 0);
+    }
+}
+
+int bi_insert(char key, char* a, int* N)
+{
+    if (*N >= SIZE) return -1; // 오버플로우 방지
+    int p = 0, i;
+    while (p < *N && key > a[p])
+        p++;
+    for (i = *N; i > p; i--)
+        a[i] = a[i - 1];
+    a[p] = key;
+    (*N)++;
+    return p;
+}
+
+int bi_search(char key, char* a, int N)
+{
+    int mid;
+    int left = 0, right = N - 1;
+    while (right >= left) {
+        mid = (left + right) / 2;
+        if (a[mid] == key) return mid;
+        if (key < a[mid])
+            right = mid - 1;
+        else
+            left = mid + 1;
+    }
+    return -1;
+}
+
+int main() {
+    char str[20] = "TOSORTALGORITHM";
+    int size = 15; // 문자열 길이 측정
+
+    // 정렬
+    heap_sort(str, size);
+    printf("Sorted: %s\n", str);
+
+    // 이진 탐색
+    int p = bi_search('S', str, size);
+    
+     printf("Found key at %d (value '%c')\n", p, str[p]);
+   
+
+    // 삽입
+    p = bi_insert('Z', str, &size);
+    
+        str[size] = '\0'; // 문자열 끝 보장
+        printf("After insert: %s\n", str);
+    
+    
+}
