@@ -1,62 +1,68 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
-#define SIZE 20
+#define SIZE 10
 
-void downheap(char* a, int N, int k)
-{
+// downheap: base는 void*, width만큼 한 요소의 크기
+void downheap(void* base, size_t width, int n, int k, int (*fcmp)(const void*, const void*)) {
+    void* temp = malloc(width);
     int i;
-    char v = a[k];
-    while (k <= N / 2 ) { 
-        i = 2 * k + 1;
-        if (i  < N && a[i] < a[i + 1]) i++; 
-        if (v >= a[i]) break;
-        a[k] = a[i];
+    memcpy(temp, (char*)base + k * width, width);  // temp = base[k]
+
+    while (2 * k + 1 < n) {
+        i = 2 * k + 1;  // 왼쪽 자식
+        if (i + 1 < n && fcmp((char*)base + i * width, (char*)base + (i + 1) * width) < 0) {
+            i++;  // 오른쪽 자식이 더 크면 오른쪽 선택
+        }
+
+        if (fcmp(temp, (char*)base + i * width) >= 0) break;
+
+        memcpy((char*)base + k * width, (char*)base + i * width, width);
         k = i;
     }
-    a[k] = v;
+
+    memcpy((char*)base + k * width, temp, width);
+    free(temp);
 }
 
-void heap_sort(char* a, int N)
-{
-    int k;
-    char t;
+void heap_sort(void* base, size_t nelem, size_t width, int (*fcmp)(const void*, const void*)) {
+    int i;
+    void* temp = malloc(width);
 
-    // Build max heap
-    for (k = N / 2 ; k >= 1; k--) {
-        downheap(a, N, k);
+    // Heap construction (bottom-up)
+    for (i = nelem / 2 - 1; i >= 0; i--) {
+        downheap(base, width, nelem, i, fcmp);
     }
 
-    // Heap sort
-    for (k = N - 1; k > 0; k--) {
-        t = a[0];
-        a[0] = a[k];
-        a[k] = t;
-        downheap(a, k, 0);
+    // Extract elements from heap
+    for (i = nelem - 1; i > 0; i--) {
+        // Swap base[0] <-> base[i]
+        memcpy(temp, (char*)base + 0 * width, width);
+        memcpy((char*)base + 0 * width, (char*)base + i * width, width);
+        memcpy((char*)base + i * width, temp, width);
+
+        downheap(base, width, i, 0, fcmp);  // downheap base[0] ~ base[i-1]
     }
+
+    free(temp);
 }
 
-int bi_insert(char key, char* a, int* N)
-{
-    if (*N >= SIZE) return -1; // 오버플로우 방지
-    int p = 0, i;
-    while (p < *N && key > a[p])
-        p++;
-    for (i = *N; i > p; i--)
-        a[i] = a[i - 1];
-    a[p] = key;
-    (*N)++;
-    return p;
+// 비교 함수
+int charcmp(const void* a, const void* b) {
+    return *(char*)a - *(char*)b;
 }
+
 
 int bi_search(char key, char* a, int N)
 {
     int mid;
-    int left = 0, right = N - 1;
+    int left = 0;
+    int right = N - 1;
     while (right >= left) {
-        mid = (left + right) / 2;
-        if (a[mid] == key) return mid;
+        mid = (right + left) / 2;
+        if (key == a[mid]) return mid;
         if (key < a[mid])
             right = mid - 1;
         else
@@ -65,25 +71,30 @@ int bi_search(char key, char* a, int N)
     return -1;
 }
 
-int main() {
+int bi_insert(char key, char* a, int* N)
+{
+    int p = 0;
+    int i;
+    while (key > a[p] && p < *N)
+        p++;
+    for (i = *N; i > p; i--)
+        a[i] = a[i - 1];
+    a[p] = key;
+    (*N)++;
+    return p;
+}
+
+
+
+void main() {
     char str[20] = "TOSORTALGORITHM";
-    int size = 15; // 문자열 길이 측정
-
-    // 정렬
-    heap_sort(str, size);
-    printf("Sorted: %s\n", str);
-
-    // 이진 탐색
+    int size = 15;
+    // Conduct sorting a str array (e.g., quick / heap sort)
+    heap_sort(str, size,sizeof(char),charcmp);
+    // Find a specific character using binary search
     int p = bi_search('S', str, size);
-    
-     printf("Found key at %d (value '%c')\n", p, str[p]);
-   
-
-    // 삽입
-    p = bi_insert('Z', str, &size);
-    
-        str[size] = '\0'; // 문자열 끝 보장
-        printf("After insert: %s\n", str);
-    
-    
+    printf("Find your key at % d(value % c)\n", p, str[p]);
+    // Insert and delete a specific character
+    p = bi_insert('Z', str, &size); // or p = bi_delete(‘A’, str, &size);
+    printf(" % s\n", str);
 }
