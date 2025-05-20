@@ -24,7 +24,7 @@ void heap_sort(char* a, int N)
     char t;
 
     // Build max heap
-    for (k = N / 2 ; k >= ; k--) {
+    for (k = N / 2 - 1; k >= 0; k--) {
         downheap(a, N, k);
     }
 
