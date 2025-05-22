@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX 100
+#define BASE(i) ((char*)base + (i) * width)
+
+typedef struct _card {
+    int no;
+    char name[20];
+} card;
+
+typedef int (*FCMP)(const void*, const void*);
+
+// 전역 변수
+card table[MAX], key;
+int nitem = 0;
+
+// 비교 함수: 학생 번호 기준
+int card_cmp(const void* a, const void* b) {
+    return ((card*)a)->no - ((card*)b)->no;
+}
+
+// 순차 탐색 함수 (일반화)
+int lv_search(void* key, void* base, size_t* num, size_t width, FCMP fcmp) {
+    for (size_t i = 0; i < *num; i++) {
+        if (fcmp(BASE(i), key) == 0)
+            return (int)i;
+    }
+    return -1;
+}
+
+// 일반화된 삽입 함수
+int lv_insert(void* key, void* base, size_t* num, size_t width, FCMP fcmp) {
+    if (*num >= MAX) return -1;
+    memcpy(BASE(*num), key, width);
+    (*num)++;
+    return (int)(*num - 1);
+}
+
+// 메인
+int main(void) {
+    // 샘플 학생 레코드 입력
+    card sample[] = {
+        {1001, "Alice"},
+        {1002, "Bob"},
+        {1003, "Charlie"},
+        {1004, "David"},
+        {1005, "Eva"}
+    };
+
+    for (int i = 0; i < 5; i++) {
+        lv_insert(&sample[i], table, (size_t*)&nitem, sizeof(card), card_cmp);
+    }
+
+    // 입력된 학생 목록 출력
+    printf("\n[학생 목록]\n");
+    for (int i = 0; i < 5; i++) {
+        printf("No = %d, Name = %s\n", sample[i].no, sample[i].name);
+    }
+
+    // 검색할 학번 입력
+    printf("검색할 학번을 입력하세요: ");
+    scanf_s("%d", &key.no);
+
+    int pos = lv_search(&key, table, (size_t*)&nitem, sizeof(card), card_cmp);
+
+    if (pos >= 0)
+        printf("No=%d, Name=%s\n", table[pos].no, table[pos].name);
+    else
+        printf("해당 학번의 학생을 찾지 못했습니다.\n");
+
+    return 0;
+}
