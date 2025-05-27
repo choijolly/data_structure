@@ -47,35 +47,26 @@ void* llv_search(void* key, node* base, size_t* num, size_t width, FCMP fcmp)
 
 void main() {
     void* p;
-    node* t, * head;
+    node* t;
     int size = 0, key = 9;
     int data[LEN] = { 3, 1, 9, 7, 5 };
 
-    init_list(&head);  // head 초기화
-    init_list(&t);     // t 초기화 (사실상 불필요, head만 쓰면 충분)
+    
+    init_list(&t);    
 
-    // Linked list에 데이터 삽입
+    // Construct your linked list
     for (int i = 0; i < LEN; i++) {
-        llv_insert(data + i, head, &size, sizeof(int), compare_int);
+        p=llv_insert(data + i, t, &size, sizeof(int), compare_int);
+     // Print out your linked list using for loop and printf()
+        printf("%d\n", *((node*)p + 1));
     }
-
-    // Print out your linked list using for loop and printf()
-    printf("Linked List Contents:\n");
-    t = head->next;
-    while (t != NULL) {
-        printf("%d ", *(int*)(t + 1));  // (t+1) 위치에 데이터가 있음
-        t = t->next;
-    }
-    printf("\n");
 
     // Conduct search with key value
-    p = llv_search(&key, head, &size, sizeof(int), compare_int);
 
-    // Print out the relative position of key value to the starting addr. of LL
-    if (p == NULL) {
-        printf("Key %d not found in the list.\n", key);
-    }
-    else {
-        printf("Key %d found at relative position: %ld bytes from the head node.\n", key, (char*)p - (char*)head);
-    }
+
+
+    
+    
+
+    
 }
