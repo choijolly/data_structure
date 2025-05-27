@@ -1,0 +1,81 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <windows.h>
+#define LEN 5
+
+typedef struct _node { struct _node* next; } node;
+typedef int (*FCMP)(const void*, const void*);
+void init_list(node** p);
+void* llv_search(void* key, node* base, size_t* num, size_t width, FCMP fcmp);
+void* llv_insert(void* key, node* base, size_t* num, size_t width, FCMP fcmp);
+void* llv_delete(void* key, node* base, size_t* num, size_t width, FCMP fcmp);
+void* llfv_search(void* key, node* base, size_t* num, size_t width, FCMP fcmp);
+
+int compare_int(const void* a, const void* b) {
+    int va = *(const int*)a;
+    int vb = *(const int*)b;
+    return va - vb;
+}
+
+void init_list(node** p) {
+    *p = (node*)malloc(sizeof(node));
+    if (*p == NULL) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+    (*p)->next = NULL;
+}
+
+void* llv_insert(void* key, node* base, size_t* num, size_t width, FCMP fcmp)
+{
+    node* t;
+    t = (node*)malloc(sizeof(node) + width);
+    memcpy(t + 1, key, width);
+    t->next = base->next;
+    base->next = t;
+    (*num)++;
+    return t;
+}
+
+void* llv_search(void* key, node* base, size_t* num, size_t width, FCMP fcmp)
+{
+    node* t = base->next;
+    while (t != NULL && fcmp(t + 1, key) != 0)
+        t = t->next;
+    return (t == NULL ? NULL : t + 1);
+}
+
+void main() {
+    void* p;
+    node* t, * head;
+    int size = 0, key = 9;
+    int data[LEN] = { 3, 1, 9, 7, 5 };
+
+    init_list(&head);  // head 초기화
+    init_list(&t);     // t 초기화 (사실상 불필요, head만 쓰면 충분)
+
+    // Linked list에 데이터 삽입
+    for (int i = 0; i < LEN; i++) {
+        llv_insert(data + i, head, &size, sizeof(int), compare_int);
+    }
+
+    // Print out your linked list using for loop and printf()
+    printf("Linked List Contents:\n");
+    t = head->next;
+    while (t != NULL) {
+        printf("%d ", *(int*)(t + 1));  // (t+1) 위치에 데이터가 있음
+        t = t->next;
+    }
+    printf("\n");
+
+    // Conduct search with key value
+    p = llv_search(&key, head, &size, sizeof(int), compare_int);
+
+    // Print out the relative position of key value to the starting addr. of LL
+    if (p == NULL) {
+        printf("Key %d not found in the list.\n", key);
+    }
+    else {
+        printf("Key %d found at relative position: %ld bytes from the head node.\n", key, (char*)p - (char*)head);
+    }
+}
