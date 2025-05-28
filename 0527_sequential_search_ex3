@@ -19,14 +19,10 @@ int compare_int(const void* a, const void* b) {
 
 void init_list(node** p) {
     *p = (node*)malloc(sizeof(node));
-    if (*p == NULL) {
-        printf("Memory allocation failed\n");
-        exit(1);
-    }
     (*p)->next = NULL;
 }
 
-void* llv_insert(void* key, node* base, size_t* num, size_t width, FCMP fcmp)
+void* llv_insert(void* key, node* base, size_t * num, size_t width, FCMP fcmp)
 {
     node* t;
     t = (node*)malloc(sizeof(node) + width);
@@ -37,9 +33,10 @@ void* llv_insert(void* key, node* base, size_t* num, size_t width, FCMP fcmp)
     return t;
 }
 
-void* llv_search(void* key, node* base, size_t* num, size_t width, FCMP fcmp)
+void* llv_search(void* key, node* base, size_t *num, size_t width, FCMP fcmp)
 {
-    node* t = base->next;
+    node* t;
+    t=base->next;
     while (t != NULL && fcmp(t + 1, key) != 0)
         t = t->next;
     return (t == NULL ? NULL : t + 1);
@@ -48,25 +45,37 @@ void* llv_search(void* key, node* base, size_t* num, size_t width, FCMP fcmp)
 void main() {
     void* p;
     node* t;
-    int size = 0, key = 9;
+    size_t size = 0;
+    int key = 9;
+
     int data[LEN] = { 3, 1, 9, 7, 5 };
 
-    
-    init_list(&t);    
+
+    init_list(&t);
 
     // Construct your linked list
     for (int i = 0; i < LEN; i++) {
-        p=llv_insert(data + i, t, &size, sizeof(int), compare_int);
-     // Print out your linked list using for loop and printf()
+        p = llv_insert(data + i, t, &size ,sizeof(int), compare_int);
+        // Print out your linked list using for loop and printf()
         printf("%d\n", *((node*)p + 1));
     }
 
     // Conduct search with key value
+    p=llv_search(&key, t, &size, sizeof(int), compare_int);
 
+    // Print out the relative position of key value to the starting addr. of LL
+    printf("-------------------------\n");
 
+    node* current = t->next;
+    int position = 0;
 
+    while (current != NULL && (current + 1) != p){
+        current = current->next;
+        position++;
+        }
+    printf("%d는 %d번째 위치하고 있습니다.", key, position+1);
     
-    
 
-    
+
+
 }
