@@ -1,0 +1,203 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct _node {
+	int key; // 노드의 값
+	struct _node* left; // 왼쪽 자식
+	struct _node* right; // 오른쪽 자식
+} node;
+
+node* head = NULL; // 트리의 최상위 노드
+
+
+int name2int(char c) {
+	return c - 'A';
+}
+
+char int2name(int i) {
+	return i + 'A';
+}
+
+// 트리 초기화 함수
+void init_tree(node** p) {
+	*p = (node*)malloc(sizeof(node));
+	(*p)->left = NULL;
+	(*p)->right = NULL;
+}
+
+// 트리 생성 함수
+node* bti_insert(int key, node* base, int* num)
+{
+	node* p, * s;
+	p = base;
+	s = base->left; // 처음에는 여기가 NULL
+
+	while (s != NULL) {// 처음에는 건너뛰나, 값이 생기면 리프노드까지 쭉 간다.
+		p = s; // p는 s를 따라다닌다, s의 부모 노드
+		// 삽입할 자리를 찾는 과정
+		if (key < s->key) s = s->left;
+		else s = s->right;
+	}
+
+	// 노드를 하나 생성
+	s = (node*)malloc(sizeof(node));
+	s->key = key;
+	s->left = NULL;
+	s->right = NULL;
+
+	// 부모 노드와 삽입할 자식 노드를 연결
+	if (key < p->key || p == base) p->left = s;
+	else p->right = s;
+
+	(*num)++; // 전체 트리의 개수를 하나 늘려준다
+
+	return s; // 삽입한 노드의 주소 반환
+}
+
+// 트리 탐색 함수
+node* bti_search(int key, node* base, int* num)
+{
+	node* s;
+	s = base->left; // root node
+
+	while (key != s->key && s != NULL) { // 찾는 값이 아니고, 끝이 아니라면
+		if (key < s->key) // 찾는 값 < 현재 노드
+			s = s->left; // 왼쪽으로 이동
+		else // 찾는 값 >= 현재노드
+			s = s->right; // 오른쪽으로 이동
+	}
+
+	if (s == NULL) return NULL; // 찾는 값이 없으면 NULL 반환
+	else return s; // 찾은 노드 주소 반환
+}
+
+// 트리의 특정 노드 삭제
+node* bti_delete(int key, node* base, int* num)
+{
+	node* parent, * son, * del, * nexth; // 삭제할 노드의 부모, 삭제할 노드, 부모의 자식, 부모의 자식(삭제할 노드가 자식 둘 다)
+	parent = base;
+	del = base->left;
+
+	// 삭제할 노드를 탐색
+	while (key != del->key && del != NULL) {
+		parent = del;
+		if (del->key > key) del = del->left;
+		else del = del->right;
+	}
+	if (del == NULL) return NULL; // 삭제할 노드를 못 찾으면
+
+	if (del->right == NULL) son = del->left;
+
+	else if (del->right->left == NULL) {
+		son = del->right;
+		son->left = del->left;
+	}
+
+	else {
+		nexth = del->right;
+		while (nexth->left->left != NULL) nexth = nexth->left;
+		son = nexth->left;
+		nexth->left = son->right;
+		son->left = del->left;
+		son->right = del->right;
+	}
+
+	// parent와 son을 연결
+	if (key < parent->key || parent == base)
+		parent->left = son; // 삭제하는 값이 부모 값보다 작으면 왼쪽에 연결
+	else // 삭제하는 값이 부모 값보다 크면 오른쪽에 연결
+		parent->right = son;
+
+	free(del); // 삭제
+
+	(*num)--; // 개수 하나 늘려주기
+
+	return parent; // 삭제한 노드의 부모 반환
+}
+
+// 원본 나무를 인오더 탐색으로 정렬해서 배열에 저장
+void bti_sort_original_tree(node* p, int* a, int* index) // 원본나무, 정렬된 값 저장 배열
+{
+	if (p != NULL) {
+		bti_sort_original_tree(p->left, a, index);
+		a[(*index)++] = p->key;
+		bti_sort_original_tree(p->right, a, index);
+	}
+}
+
+// 정렬된 값 저장 배열을 이용해 균형 잡힌 트리 만들기
+node* make_balance_tree(int N, int* a, int* index)
+{
+	int nl, nr;
+	node* p;
+
+	if (N > 0) {
+		nl = (N - 1) / 2; // 개수/2
+		nr = N - nl - 1; // 절반에서 가운데는 빼고 계산
+
+		p = (node*)malloc(sizeof(node)); // 노드 생성
+
+		p->left = make_balance_tree(nl, a, index);
+		p->key = a[(*index)++]; // 실제 값 넣기
+		p->right = make_balance_tree(nr, a, index);
+
+		return p; // 만든 나무 반환
+	}
+	else return NULL; // 데이터의 개수가 0보다 크지 않다면
+}
+
+
+int main() {
+	int size = 0; // 트리의 노드 수
+	node* result; // 탐색 결과 저장 노드
+	int* sort_result; // 트리를 정렬하여 값을 저장
+	int index = 0; // 정렬된 배열 인덱스
+
+	// 트리 초기화
+	init_tree(&head);
+
+	// 강의자료의 트리 생성
+	bti_insert(name2int('F'), head, &size);
+	bti_insert(name2int('B'), head, &size);
+	bti_insert(name2int('O'), head, &size);
+	bti_insert(name2int('A'), head, &size);
+	bti_insert(name2int('D'), head, &size);
+	bti_insert(name2int('C'), head, &size);
+	bti_insert(name2int('L'), head, &size);
+	bti_insert(name2int('G'), head, &size);
+	bti_insert(name2int('M'), head, &size);
+	bti_insert(name2int('H'), head, &size);
+	bti_insert(name2int('N'), head, &size);
+	bti_insert(name2int('K'), head, &size);
+
+	// 트리 생성 제대로 되었는지 확인
+	printf("Check Original Tree : %c\n", int2name(head->left->right->left->left->right->key)); // 'H'가 나와야 함.
+
+	// 'C' 값을 가진 노드를 트리에서 탐색
+	result = bti_search(name2int('C'), head, &size);
+
+	// 탐색한 값 출력
+	printf("Finding Key : %c\n", int2name(result->key));
+
+	// 균형 잡힌 트리 생성
+	sort_result = (int*)malloc(size * sizeof(int));
+	bti_sort_original_tree(head, sort_result, &index);
+	index = 0;
+	head->left = make_balance_tree(size, sort_result, &index);
+
+	// 트리 생성 제대로 되었는지 확인
+	printf("\nCheck Balanced Tree : %c\n", int2name(head->left->right->left->right->key)); // 'K'가 나와야 함.
+
+	// 'C' 값을 가진 노드를 트리에서 탐색
+	result = bti_search(name2int('C'), head, &size);
+
+	// 탐색한 값 출력
+	printf("Finding Key : %c\n", int2name(result->key));
+
+	// 특정 노드 삭제
+	result = bti_delete(name2int('H'), head, &size);
+	printf("Parent of Deleted Key : %c\n", int2name(result->key));
+
+	free(sort_result);
+	return 0;
+}
