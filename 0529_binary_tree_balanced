@@ -72,7 +72,7 @@ node* bti_search(int key, node* base, int* num)
 }
 
 // 트리의 특정 노드 삭제
-node* bti_delete(int key, node* base, int* num)
+node* bti_delete1(int key, node* base, int* num)
 {
 	node* parent, * son, * del, * nexth; // 삭제할 노드의 부모, 삭제할 노드, 부모의 자식, 부모의 자식(삭제할 노드가 자식 둘 다)
 	parent = base;
@@ -86,33 +86,39 @@ node* bti_delete(int key, node* base, int* num)
 	}
 	if (del == NULL) return NULL; // 삭제할 노드를 못 찾으면
 
-	if (del->right == NULL) son = del->left;
+	if (del->left == NULL && del->right == NULL)
+		son = NULL;
 
-	else if (del->right->left == NULL) {
-		son = del->right;
-		son->left = del->left;
-	}
 
-	else {
+	else if (del->left != NULL && del->right != NULL)
+	{
 		nexth = del->right;
-		while (nexth->left->left != NULL) nexth = nexth->left;
-		son = nexth->left;
-		nexth->left = son->right;
-		son->left = del->left;
-		son->right = del->right;
+		if (nexth->left != NULL) {
+			while (nexth->left->left != NULL) nexth = nexth->left;
+			son = nexth->left;
+			nexth->left = son->right;
+			son->left = del->left;
+			son->right = del->right;
+		}
+		else
+		{
+			son = nexth;
+			son->left = del->left;
+		}
 	}
-
-	// parent와 son을 연결
+		
+	else
+	{
+		if (del->left != NULL) son = del->left;
+		else son = del->right;
+	}
 	if (key < parent->key || parent == base)
-		parent->left = son; // 삭제하는 값이 부모 값보다 작으면 왼쪽에 연결
-	else // 삭제하는 값이 부모 값보다 크면 오른쪽에 연결
+		parent->left = son;
+	else
 		parent->right = son;
-
-	free(del); // 삭제
-
-	(*num)--; // 개수 하나 늘려주기
-
-	return parent; // 삭제한 노드의 부모 반환
+	free(del);
+	(*num)--;
+	return parent;
 }
 
 // 원본 나무를 인오더 탐색으로 정렬해서 배열에 저장
@@ -195,7 +201,7 @@ int main() {
 	printf("Finding Key : %c\n", int2name(result->key));
 
 	// 특정 노드 삭제
-	result = bti_delete(name2int('H'), head, &size);
+	result = bti_delete1(name2int('H'), head, &size);
 	printf("Parent of Deleted Key : %c\n", int2name(result->key));
 
 	free(sort_result);
