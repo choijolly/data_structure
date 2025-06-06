@@ -1,59 +1,58 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #define SIZE 10
+#define BASE(i) ((char*)base + (i) * width)
 
-void gen_quick_sort(void* base, size_t nelem, size_t width, int (*fcmp)(const void*, const void*)) {
-    if (nelem <= 1) return;
+typedef int(*FCMP)(const void*, const void*);
 
-    char* base_ptr = (char*)base;
-    void* pivot = malloc(width);
-    void* temp = malloc(width);
-
-    size_t i = -1;
-    size_t j = nelem - 1;
-    memcpy(pivot, base_ptr + (nelem - 1) * width, width); // pivot = base[N-1]
-
-    while (1) {
-        do { i++; } while (fcmp(base_ptr + i * width, pivot) < 0);
-        do { j--; } while (j > 0 && fcmp(base_ptr + j * width, pivot) > 0);
-        if (i >= j) break;
-
-        // swap i <-> j
-        memcpy(temp, base_ptr + i * width, width);
-        memcpy(base_ptr + i * width, base_ptr + j * width, width);
-        memcpy(base_ptr + j * width, temp, width);
-    }
-
-    // pivot swap with i
-    memcpy(temp, base_ptr + i * width, width);
-    memcpy(base_ptr + i * width, base_ptr + (nelem - 1) * width, width);
-    memcpy(base_ptr + (nelem - 1) * width, temp, width);
-
-    // recursive calls
-    gen_quick_sort(base_ptr, i, width, fcmp);
-    gen_quick_sort(base_ptr + (i + 1) * width, nelem - i - 1, width, fcmp);
-
-    free(pivot);
-    free(temp);
+int intcmp(const void* a, const void* b) {
+    return (*(int*)a - *(int*)b);
 }
 
-// 비교 함수: int형 오름차순 정렬
-int intcmp(const void* a, const void* b) {
-    return (*(int*)a) - (*(int*)b);
+void quick_sort(void* base, size_t num, size_t width, FCMP fcmp) {
+    if (num <= 1) return;
+
+    int i = -1;
+    int j = num - 1;  
+    void* pivot = malloc(width);
+    memcpy(pivot, BASE(num - 1), width);
+
+    void* temp = malloc(width);
+
+    while (1) {
+        while (fcmp(BASE(++i), pivot) < 0);
+        while (fcmp(BASE(--j), pivot) > 0);
+
+        if (i >= j) break;
+
+        memcpy(temp, BASE(i), width);
+        memcpy(BASE(i), BASE(j), width);
+        memcpy(BASE(j), temp, width);
+        i++; j--;
+    }
+
+    // pivot과 i 위치 교환
+    memcpy(temp, BASE(i), width);
+    memcpy(BASE(i), BASE(num - 1), width);
+    memcpy(BASE(num - 1), temp, width);
+
+    free(temp);
+    free(pivot);
+
+    // 왼쪽, 오른쪽 분할 정렬
+    quick_sort(base, i, width, fcmp);  // 왼쪽은 i개
+    quick_sort(BASE(i + 1), num - i - 1, width, fcmp);  // 오른쪽
 }
 
 int main() {
     int num[SIZE] = { 9,8,7,6,5,4,3,2,1,0 };
-
-    gen_quick_sort(num, SIZE, sizeof(int), intcmp);
+    quick_sort(num, SIZE, sizeof(int), intcmp);
 
     for (int i = 0; i < SIZE; i++) {
         printf("%d ", num[i]);
     }
     printf("\n");
-
     return 0;
 }
