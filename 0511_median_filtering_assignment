@@ -1,20 +1,21 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
-#define _CRT_SECURE_NO_WARNINGS
 
-void read_file(int* input, int height, int width, char filename[]);
+
+void read_file(int* input, int height, int width, const char filename[]);
 void median_filtering(int* input, int* output, int height, int width, int window_size);
 void insertion_sort(int* arr, int size);
 
 // 파일에서 입력 데이터 읽기
-void read_file(int* input, int height, int width, char filename[]) {
+void read_file(int* input, int height, int width, const char filename[]) {
     int x, y;
     FILE* fp = fopen(filename, "r");
-    
+
 
     for (y = 0; y < height; y++) {
         for (x = 0; x < width; x++) {
-            fscanf_s(fp, "%d", &input[y * width + x]);
+            fscanf(fp, "%d", &input[y * width + x]);
         }
     }
     fclose(fp);
@@ -39,27 +40,31 @@ void median_filtering(int* input, int* output, int height, int width, int w) {
     int* window = (int*)malloc(sizeof(int) * win_size);
     int half = w / 2;
 
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
+    for (int y=0;y < height;y++) {
+        for (int x = 0;x < width;x++) {
+
             int count = 0;
 
-            for (int dy = -half; dy <= half; dy++) {
-                for (int dx = -half; dx <= half; dx++) {
+            for (int dy = -half;dy <= half;dy++) {
+                for (int dx = -half;dx <= half;dx++) {
+                   
                     int ny = y + dy;
                     int nx = x + dx;
 
-                    // replication padding
-                    if (ny < 0) ny = 0;
-                    if (ny >= height) ny = height - 1;
-                    if (nx < 0) nx = 0;
-                    if (nx >= width) nx = width - 1;
+                    ny = (ny < 0) ? 0 : (ny >= height) ?  height - 1 : ny;
+                    nx = (nx < 0) ? 0 : (nx >= width) ? width - 1 : nx;
 
                     window[count++] = input[ny * width + nx];
+
                 }
             }
 
             insertion_sort(window, win_size);
             output[y * width + x] = window[win_size / 2];
+
+
+
+
         }
     }
 
@@ -85,14 +90,14 @@ int main() {
         W += 1;
     }
 
-    read_file(input, height, width, "C:\\Users\\미경\\Downloads\\noisy_data.txt");
+    read_file(input, height, width, "C:\\Users\\asdzx\\Desktop\\noisy_data.txt");
     median_filtering(input, output, height, width, W);
 
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             printf("%3d ", output[y * width + x]);
-         
-        
+
+
         }
         printf("\n");
     }
