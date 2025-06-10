@@ -1,0 +1,156 @@
+#include<stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#define SIZE 20
+#define BASE(i) ((char*)base+(i)*width)
+
+typedef int(*FCMP)(const void* a, const void* b);
+
+int compare_int(const void* a, const void* b) {
+	return (*(int*)a - *(int*)b);
+}
+
+int stack[SIZE];
+int top;
+
+void init_stack(void) {
+	top = -1;
+}
+
+
+int is_stack_empty() {
+	return top == -1;
+}
+
+
+int push(int t) {
+	if (top >= SIZE - 1) {
+		printf("Stack overflow !!!\n");
+		return -1;
+	}
+	stack[++top] = t;
+	return t;
+}
+
+
+
+int pop() {
+	if (top < 0) {
+		printf("Stack underflow!!!\n");
+		return -1;
+	}
+	return stack[top--];
+}
+
+void insert_sort(void * base,size_t N ,size_t width, FCMP fcmp)
+{
+	int i, j;
+
+	void* t = malloc(width);
+
+	for (i = 1; i < N; i++)
+	{
+		//t = a[i];
+		memcpy(t, BASE(i), width);
+		j = i;
+		
+		//while (j > 0 && a[j - 1] > t)w
+		while(j>0 && fcmp(BASE(j-1),t)>0)
+		{
+			//a[j] = a[j - 1];
+			memcpy(BASE(j), BASE(j - 1), width);
+			j--;
+		}
+		//a[j] = t;
+		memcpy(BASE(j), t, width);
+	}
+	free(t);
+}
+
+void quick_sort1(void * base,size_t N,size_t width, FCMP fcmp)
+{
+	//int v, t;
+	
+	int i, j;
+	int l, r;
+
+	init_stack();
+
+	l = 0;
+	r = N - 1;
+	
+	void* v = malloc(width);
+    void* t = malloc(width);
+
+	push(r);
+	push(l);
+
+	while (!is_stack_empty()) {
+		l = pop();
+		r = pop();
+
+		if (r - l + 1 > 5) {
+			int pivot = rand() % N;
+			//v = a[t];
+            memcpy(v, BASE(pivot), width);
+
+			//a[t] = a[r];
+			memcpy(BASE(pivot), BASE(r), width);
+			//a[r] = v;
+			memcpy(BASE(r), v, width);
+
+			i = l - 1;
+			j = r;
+
+			while (1) {
+				//while (a[++i] < v);
+				
+			 while (fcmp(BASE(++i), v) < 0);
+				//while (a[--j] > v); 
+				while (fcmp(BASE(--j), v) >0);
+
+				if (i >= j) break;
+
+				//t = a[i];
+				memcpy(t, BASE(i), width);
+				//a[i] = a[j];
+				memcpy(BASE(i), BASE(j), width);
+				//a[j] = t;
+				memcpy(BASE(j), t, width);
+			}
+
+			//t = a[i];
+			memcpy(t, BASE(i), width);
+			//a[i] = a[r];
+			memcpy(BASE(i), BASE(r), width);
+			//a[r] = t;
+			memcpy(BASE(r), t, width);
+
+			// 오른쪽 구간
+			push(r);
+			push(i + 1);
+			// 왼쪽 구간
+			push(i - 1);
+			push(l);
+		}
+		else {
+			insert_sort(BASE(l), r - l + 1, width, compare_int);
+		}
+	}
+
+    free(t);
+    free(v);
+}
+
+
+int main() {
+	int num[SIZE] = { 19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0 };
+
+	quick_sort1(num, SIZE,sizeof(int),compare_int);
+
+	for (int i = 0; i < SIZE; i++)
+	{
+		printf("%d ", num[i]);
+	}
+	printf("\n");
+}
