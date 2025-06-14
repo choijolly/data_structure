@@ -1,0 +1,176 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+typedef struct node {
+    int key;
+    int red;
+    struct node* left;
+    struct node* right;
+}node;
+
+typedef struct wcount {
+    int count;
+    int word[20];
+}wcount;
+
+node* head;
+
+int name2int(char c);
+char int2name(int n);
+void init_tree(node** p);
+
+node* rbti_insert(int key, node* base, int* num);
+node* rotate(int key, node* pivot, node* base);
+node* bti_search(int key, node* base, int* num);
+
+
+
+
+void main() {
+    int data[10] = { 'K','L','C','A','E','F','D','I','H','G' };
+    int num = 0;
+    node* t;
+
+    init_tree(&head);
+
+    for (int i = 0; i < 10; i++) {
+        rbti_insert(name2int(data[i]), head, &num);
+    }
+
+    // Find 'F'
+    t = bti_search(name2int('F'), head, &num);
+    printf("%c\n", int2name(t->key));
+
+    // H, Red
+    printf("%c:%c", int2name(head->left->right->left->key), (head->left->right->left->red == 1) ? 'R' : 'B');
+
+}
+
+
+//===================================[Red Black Tree - int version]==============================================
+
+void init_tree(node** p) {
+    *p = (node*)malloc(sizeof(node));
+    (*p)->key = 0;
+    (*p)->red = 0;
+    (*p)->left = NULL;
+    (*p)->right = NULL;
+}
+
+
+node* rbti_insert(int key, node* base, int* num) {
+    node* t, * parent, * gparent, * ggparent;
+    ggparent = gparent = parent = base;
+
+    t = base->left;
+
+    while (t != NULL) {
+        if (key == t->key)return NULL; //이미 가지고 있는 노드라면 NULL을 반환
+
+        if (t->left && t->right && t->left->red && t->right->red) { // 2자식이 모두 red
+            // color flip
+            t->red = 1;
+            t->left->red = t->right->red = 0;
+
+            if (parent->red) { // color flip 했는데 부모가 red일 때
+                gparent->red = 1;
+                if (key < gparent->key != key < parent->key) { //LR or RL
+                    parent = rotate(key, gparent, base); //
+                }
+                t = rotate(key, ggparent, base);
+                t->red = 0;
+            }
+            base->left->red = 0; //루트 노드 검정색
+        }
+        // t가 한칸 더 깊게 들어가기 위해 조상 노드 한칸씩 당기기
+        ggparent = gparent;
+        gparent = parent;
+        parent = t;
+        if (key < t->key)t = t->left;
+        else t = t->right;
+    }
+
+    // while문을 나오면 t는 이제 key가 들어갈 위치이다.
+    t = (node*)malloc(sizeof(node));
+    t->key = key;
+    t->left = NULL;
+    t->right = NULL;
+    if (key < parent->key || parent == base)parent->left = t;
+    else parent->right = t;
+    (*num)++;
+    t->red = 1;
+
+    if (parent->red) {
+        gparent->red = 1;
+        if (key < gparent->key != key < parent->key) { //LR or RL
+            parent = rotate(key, gparent, base); //
+        }
+        t = rotate(key, ggparent, base);
+        t->red = 0;
+    }
+    base->left->red = 0;
+
+    return t;
+}
+
+
+// key는 이번에 트리로 입력된 값
+// LR, RL에서 pivot은 gparent
+// LL, RR에서 pivot은 ggparent
+node* rotate(int key, node* pivot, node* base) {
+    node* child, * gchild;
+
+    if (key < pivot->key || pivot == head) { // LL or LR
+        child = pivot->left;
+    }
+    else {                                   // RR or RL
+        child = pivot->right;
+    }
+
+    if (key < child->key) {                // LL or RL
+        gchild = child->left;              // gchild는 child의 왼쪽
+        child->left = gchild->right;       // gchild의 right을 자기 자리에 넣고
+        gchild->right = child;             // ghild가 child위로 올라감  
+    }
+    else {                                 // RR or LR
+        gchild = child->right;
+        child->right = gchild->left;
+        gchild->left = child;
+    }
+
+    if (key < pivot->key || pivot == base) {
+        pivot->left = gchild;
+    }
+    else {
+        pivot->right = gchild;
+    }
+
+    return gchild;
+}
+
+
+node* bti_search(int key, node* base, int* num) {
+    node* s;
+    s = base->left;
+    while (s != NULL && key != s->key) {
+        if (key < s->key)
+            s = s->left;
+        else
+            s = s->right;
+    }
+    if (s == NULL)return NULL;
+    else return s;
+}
+
+
+//=============================================[Utitlites]======================================================
+
+int name2int(char c) {
+    return c - 'A';
+}
+char int2name(int n) {
+    return 'A' + n;
+}
